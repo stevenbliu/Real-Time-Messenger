@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+</head>
+<body>
+    <h1>Chat Room: {{ room_name }}</h1>
+
+    <!-- Username input -->
+    <div id="username-section">
+        <label for="username">Enter your username:</label>
+        <input type="text" id="username" placeholder="Username" />
+        <button id="join-button">Join</button>
+    </div>
+
+    <!-- Chat Log -->
+    <textarea id="chat-log" cols="100" rows="20" readonly></textarea><br>
+
+    <!-- Message Input -->
+    <input id="chat-message-input" type="text" placeholder="Type a message" disabled style="width: 100%;"/>
+
+    <script>
+        const roomName = "{{ room_name }}";  // Use the room name passed from the Django view
+        let chatSocket = null;
+        let username = "";
+
+        // Handle the 'Join' button click event to get the username and enable chat
+        document.querySelector("#join-button").onclick = function() {
+            username = document.querySelector("#username").value.trim();
+            if (username) {
+                // Disable the username input and join button
+                document.querySelector("#username-section").style.display = "none";
+                document.querySelector("#chat-message-input").disabled = false;
+
+                // Log the room name and username for debugging
+                console.log('Room Name:', roomName);
+                console.log('Username:', username);
+
+                // Create the WebSocket connection with the room name and username
+                const wsUrl = 'ws://' + window.location.host + '/ws/chat/' + roomName + '/';
+                console.log('WebSocket URL:', wsUrl);
+                chatSocket = new WebSocket(wsUrl);
+
+                chatSocket.onopen = function() {
+                    console.log('WebSocket connection established');
+                };
+
+                chatSocket.onmessage = function(e) {
+                    const data = JSON.parse(e.data);
+                    document.querySelector('#chat-log').value += (data.message + ' (' + data.user + ')\n');
+                };
+
+                chatSocket.onerror = function(e) {
+                    console.error('Chat socket error:', e);
+                };
+
+                chatSocket.onclose = function(e) {
+                    console.log('WebSocket connection closed:', e);
+                    alert('Connection closed. Please refresh the page.');
+                };
+
+                // Send message when the Enter key is pressed
+                document.querySelector('#chat-message-input').onkeyup = function(e) {
+                    if (e.keyCode === 13) {  // Enter key
+                        const messageInputDom = document.querySelector('#chat-message-input');
+                        const message = messageInputDom.value;
+                        if (message.trim()) {
+                            // Send the message with the username
+                            chatSocket.send(JSON.stringify({
+                                'message': message,
+                                'user': username
+                            }));
+                            messageInputDom.value = ''; // Clear the input field
+                        }
+                    }
+                };
+
+                // Set focus to the message input field after joining
+                document.querySelector("#chat-message-input").focus();
+            } else {
+                alert("Please enter a username!");
+            }
+        };
+    </script>
+</body>
+</html>
