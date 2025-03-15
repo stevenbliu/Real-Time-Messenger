@@ -39,9 +39,12 @@
                 console.log('Username:', username);
 
                 // Create the WebSocket connection with the room name and username
-                const wsUrl = 'ws://' + window.location.host + '/ws/chat/' + roomName + '/';
+                {% comment %} const wsUrl = 'ws://' + window.location.host + '/ws/chat/' + roomName + '/'; {% endcomment %}
+                const wsUrl = 'ws://' + window.location.host + '/ws/chat/1/';
+
                 console.log('WebSocket URL:', wsUrl);
                 chatSocket = new WebSocket(wsUrl);
+                console.log('Created Websocket');
 
                 chatSocket.onopen = function() {
                     console.log('WebSocket connection established');

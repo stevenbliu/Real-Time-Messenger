@@ -31,16 +31,19 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'chat', 
+    # 'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'chat', 
-    'channels',
+ 
 ]
 
+# daphne
 ASGI_APPLICATION = 'mychat.asgi.application'
 
  
@@ -53,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+ 
 ROOT_URLCONF = 'mychat.urls'
 
 TEMPLATES = [
@@ -68,8 +71,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-        },
-    },
+        }, 
+    },  
 ]
 
 WSGI_APPLICATION = 'mychat.wsgi.application'
@@ -97,11 +100,11 @@ CHANNEL_LAYERS = {
             "hosts": [('redis', 6379)],
         },
     },
-}
+} 
  
  
 
-# Password validation
+# Password validation 
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [

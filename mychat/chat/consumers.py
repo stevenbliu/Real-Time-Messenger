@@ -2,20 +2,22 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Message
-from asgiref.sync import database_sync_to_async
+# from asgiref.sync import database_sync_to_async
 import logging
+from channels.db import database_sync_to_async
 
 logger = logging.getLogger(__name__)
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        logger.info("Connecting to WebSocket...")
         try:
             logging.info("Connecting to WebSocket...")
             self.room_name = self.scope['url_route']['kwargs']['room_name']
             self.room_group_name = f'chat_{self.room_name}'
 
             # Join the room group
-            await self.channel_layer.group_add(
+            self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
             )
@@ -42,8 +44,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         logger.info(f"Received message from user {user}: {message}")
         
         # Save the message to the database
-        await database_sync_to_async(self.save_message)(message, user)
-        logger.info(f"Message saved to database: {message}")
+        await database_sync_to_async(self.save_message)(message)
+        logger.info(f"Message saved to database: {message} - Skippin" )
 
         # Send message to the room group
         await self.channel_layer.group_send(
@@ -67,6 +69,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
         logger.info(f"Message sent to WebSocket: {message}")
 
-    def save_message(self, message, user):
-        Message.objects.create(message=message, room_name=self.room_name, user=user)
+    def save_message(self, message):
+        Message.objects.create(message=message, room_name=self.room_name)
         logger.info(f"Message saved to database: {message}")
